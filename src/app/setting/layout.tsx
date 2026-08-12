@@ -1,14 +1,12 @@
 import { auth } from "@/lib/auth";
-import { signOut } from "@/lib/auth";
 import { ReactNode } from "react";
 import Sidebar from "@/components/Sidebar";
 import pool from "@/lib/db";
 
-export default async function DashboardLayout({ children }: { children: ReactNode }) {
+export default async function SettingLayout({ children }: { children: ReactNode }) {
   const session = await auth();
   const userRole = (session?.user as any)?.role || "user";
 
-  // Fetch menus filtered by role
   const [rows] = await pool.execute(
     'SELECT * FROM menus WHERE access_role = ? OR access_role = "all" ORDER BY parent_id ASC, order_num ASC',
     [userRole]

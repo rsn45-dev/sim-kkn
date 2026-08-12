@@ -13,7 +13,9 @@ import {
   ChevronLeft,
   ChevronRight,
   MenuSquare,
-  UserCog
+  UserCog,
+  ShieldCheck,
+  Settings
 } from "lucide-react";
 
 // Helper to map string icon names to Lucide components
@@ -22,10 +24,17 @@ const IconMap: Record<string, any> = {
   Users,
   FileText,
   MenuSquare,
-  UserCog
+  UserCog,
+  ShieldCheck,
+  Settings
 };
 
-export default function Sidebar({ menus }: { menus: any[] }) {
+type SidebarProps = {
+  menus: any[];
+  user?: any;
+};
+
+export default function Sidebar({ menus, user }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const pathname = usePathname();
@@ -48,13 +57,14 @@ export default function Sidebar({ menus }: { menus: any[] }) {
           md:relative md:flex
         `}
       >
-        <div className="flex items-center justify-between h-16 px-4 border-b border-slate-200">
-          <div className="flex items-center">
+        {/* Logo */}
+        <div className="flex items-center justify-between h-16 px-4 border-b border-slate-200 flex-shrink-0">
+          <div className="flex items-center overflow-hidden">
             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
               <Activity className="w-5 h-5 text-white" />
             </div>
             {!isCollapsed && (
-              <span className="ml-3 text-xl font-bold text-slate-900 whitespace-nowrap overflow-hidden">
+              <span className="ml-3 text-xl font-bold text-slate-900 whitespace-nowrap truncate">
                 Stunting Care
               </span>
             )}
@@ -63,12 +73,13 @@ export default function Sidebar({ menus }: { menus: any[] }) {
           {/* Desktop collapse toggle */}
           <button 
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="hidden md:flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 absolute -right-3 border border-slate-200"
+            className="hidden md:flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 absolute -right-3 border border-slate-200 z-10"
           >
             {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
           </button>
         </div>
 
+        {/* Nav */}
         <div className="flex-1 overflow-y-auto py-4">
           <nav className="px-2 space-y-1">
             {menus.filter(m => !m.parent_id).map((menu) => {
@@ -100,7 +111,7 @@ export default function Sidebar({ menus }: { menus: any[] }) {
                     )}
                   </Link>
 
-                  {/* Render Sub Menus on Hover */}
+                  {/* Hover-triggered sub-menus */}
                   {!isCollapsed && subMenus.length > 0 && (
                     <div className="ml-8 border-l border-slate-200 pl-2 max-h-0 opacity-0 overflow-hidden group-hover:max-h-96 group-hover:opacity-100 transition-all duration-300 ease-in-out">
                       <div className="space-y-1 mt-1 pb-1">
@@ -133,33 +144,36 @@ export default function Sidebar({ menus }: { menus: any[] }) {
           </nav>
         </div>
 
-        <div className="border-t border-slate-200 p-4">
-          <Link 
-            href="/" 
-            className={`flex items-center group ${isCollapsed ? 'justify-center' : ''}`}
-            title={isCollapsed ? "Keluar" : undefined}
-          >
-            <div className="flex-shrink-0 h-9 w-9 rounded-full bg-slate-200 flex items-center justify-center">
-              <User className="h-5 w-5 text-slate-500" />
-            </div>
-            {!isCollapsed && (
-              <>
-                <div className="ml-3 overflow-hidden">
-                  <p className="text-sm font-medium text-slate-700 group-hover:text-slate-900 truncate">
-                    Admin
-                  </p>
-                  <p className="text-xs font-medium text-slate-500 group-hover:text-slate-700">
-                    Keluar
-                  </p>
-                </div>
-                <LogOut className="ml-auto h-5 w-5 text-slate-400 group-hover:text-slate-500 flex-shrink-0" />
-              </>
-            )}
-          </Link>
+        {/* User info + sign out */}
+        <div className="border-t border-slate-200 p-4 flex-shrink-0">
+          <form action="/api/auth/signout" method="POST">
+            <button
+              type="submit"
+              className={`flex items-center w-full group ${isCollapsed ? 'justify-center' : ''}`}
+              title={isCollapsed ? "Keluar" : undefined}
+            >
+              <div className="flex-shrink-0 h-9 w-9 rounded-full bg-blue-100 flex items-center justify-center">
+                <User className="h-5 w-5 text-blue-600" />
+              </div>
+              {!isCollapsed && (
+                <>
+                  <div className="ml-3 overflow-hidden text-left">
+                    <p className="text-sm font-medium text-slate-700 group-hover:text-slate-900 truncate">
+                      {user?.name || "Pengguna"}
+                    </p>
+                    <p className="text-xs font-medium text-slate-500 group-hover:text-slate-700">
+                      Keluar
+                    </p>
+                  </div>
+                  <LogOut className="ml-auto h-5 w-5 text-slate-400 group-hover:text-red-500 flex-shrink-0 transition-colors" />
+                </>
+              )}
+            </button>
+          </form>
         </div>
       </div>
 
-      {/* Mobile top bar toggle button (rendered by parent layout) */}
+      {/* Mobile top bar */}
       <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 z-30">
         <div className="flex items-center">
           <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center mr-3">

@@ -1,20 +1,13 @@
 import pool from "@/lib/db";
-import { UserCog, KeyRound, Search } from "lucide-react";
-import { revalidatePath } from "next/cache";
+import { UserCog, Search } from "lucide-react";
+import UserEditForm from "./UserEditForm";
 
 export default async function UsersPage() {
   const [rows] = await pool.execute('SELECT * FROM users ORDER BY created_at DESC');
   const users = rows as any[];
 
-  async function resetPassword(formData: FormData) {
-    "use server";
-    const userId = formData.get("userId");
-    if (!userId) return;
-
-    // Reset password to '123456' temporarily for demo purposes
-    await pool.execute('UPDATE users SET password = ? WHERE id = ?', ['123456', userId]);
-    revalidatePath('/dashboard/users');
-  }
+  const [roleRows] = await pool.execute('SELECT * FROM roles ORDER BY name ASC');
+  const roles = roleRows as any[];
 
   return (
     <div>
@@ -72,17 +65,9 @@ export default async function UsersPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <form action={resetPassword}>
-                        <input type="hidden" name="userId" value={user.id} />
-                        <button 
-                          type="submit"
-                          className="inline-flex items-center text-orange-600 hover:text-orange-900 bg-orange-50 hover:bg-orange-100 px-3 py-1.5 rounded-lg transition-colors"
-                          title="Reset Password ke '123456'"
-                        >
-                          <KeyRound className="w-4 h-4 mr-1.5" />
-                          Reset Pass
-                        </button>
-                      </form>
+                      <div className="flex justify-end">
+                        <UserEditForm user={user} roles={roles} />
+                      </div>
                     </td>
                   </tr>
                 ))
