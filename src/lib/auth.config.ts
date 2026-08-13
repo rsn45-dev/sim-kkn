@@ -14,14 +14,14 @@ export const authConfig: NextAuthConfig = {
     }),
   ],
   pages: {
-    signIn: "/",
+    signIn: "/login",
   },
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
       const role = (auth?.user as any)?.role;
 
-      const publicRoutes = ["/", "/register"];
+      const publicRoutes = ["/", "/login", "/register"];
       const isPublic = publicRoutes.includes(nextUrl.pathname);
 
       // Route admin only
@@ -31,15 +31,15 @@ export const authConfig: NextAuthConfig = {
       );
 
       if (isPublic) {
-        // Kalau sudah login dan ke halaman login, redirect ke dashboard
-        if (isLoggedIn && nextUrl.pathname === "/") {
+        // Kalau sudah login dan ke halaman login/register, redirect ke dashboard
+        if (isLoggedIn && (nextUrl.pathname === "/login" || nextUrl.pathname === "/register")) {
           return Response.redirect(new URL("/dashboard", nextUrl));
         }
         return true;
       }
 
       if (!isLoggedIn) {
-        return Response.redirect(new URL("/", nextUrl));
+        return Response.redirect(new URL("/login", nextUrl));
       }
 
       if (isAdminRoute && role !== "admin") {
