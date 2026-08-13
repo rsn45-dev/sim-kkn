@@ -1,9 +1,11 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import pool from "@/lib/db";
+import { authConfig } from "@/lib/auth.config";
 
+// Full auth dengan DB — hanya dipakai di Server Components & Server Actions
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  secret: process.env.AUTH_SECRET,
+  ...authConfig,
   providers: [
     Credentials({
       name: "credentials",
@@ -21,10 +23,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           ) as any[];
 
           const user = rows[0];
-
           if (!user) return null;
-
-          // Simple plain text comparison — in production use bcrypt
           if (user.password !== credentials.password) return null;
 
           return {
@@ -40,26 +39,4 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
     }),
   ],
-  callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.role = (user as any).role;
-        token.id = (user as any).id;
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      if (session.user) {
-        (session.user as any).role = token.role;
-        (session.user as any).id = token.id;
-      }
-      return session;
-    },
-  },
-  pages: {
-    signIn: "/",
-  },
-  session: {
-    strategy: "jwt",
-  },
 });
