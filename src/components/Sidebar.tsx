@@ -17,6 +17,7 @@ import {
   ShieldCheck,
   Settings
 } from "lucide-react";
+import { logoutUser } from "@/app/actions/auth";
 
 // Helper to map string icon names to Lucide components
 const IconMap: Record<string, any> = {
@@ -146,7 +147,7 @@ export default function Sidebar({ menus, user }: SidebarProps) {
 
         {/* User info + sign out */}
         <div className="border-t border-slate-200 p-4 flex-shrink-0">
-          <form action="/api/auth/signout" method="POST">
+          <form action={logoutUser}>
             <button
               type="submit"
               className={`flex items-center w-full group ${isCollapsed ? 'justify-center' : ''}`}

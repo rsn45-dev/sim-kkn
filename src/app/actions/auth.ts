@@ -1,7 +1,11 @@
 "use server";
 
-import { signIn } from "@/lib/auth";
+import { signIn, signOut } from "@/lib/auth";
 import { AuthError } from "next-auth";
+
+export async function logoutUser() {
+  await signOut({ redirectTo: "/" });
+}
 
 export async function loginUser(prevState: any, formData: FormData) {
   try {
