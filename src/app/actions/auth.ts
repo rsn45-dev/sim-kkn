@@ -3,7 +3,7 @@
 import { signIn } from "@/lib/auth";
 import { AuthError } from "next-auth";
 
-export async function loginUser(formData: FormData) {
+export async function loginUser(prevState: any, formData: FormData) {
   try {
     await signIn("credentials", {
       email: formData.get("email"),
