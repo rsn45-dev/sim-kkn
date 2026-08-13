@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { useFormState } from "react-dom";
+import { useState, useActionState } from "react";
 import Link from "next/link";
 import { Activity, AlertCircle, Eye, EyeOff } from "lucide-react";
 import { loginUser } from "@/app/actions/auth";
@@ -9,7 +8,7 @@ import { loginUser } from "@/app/actions/auth";
 const initialState = { error: "" };
 
 export default function LoginForm() {
-  const [state, formAction] = useFormState(loginUser as any, initialState);
+  const [state, formAction] = useActionState(loginUser as any, initialState);
   const [showPassword, setShowPassword] = useState(false);
 
   return (
