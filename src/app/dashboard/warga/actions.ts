@@ -1,0 +1,32 @@
+"use server";
+
+import pool from "@/lib/db";
+import { revalidatePath } from "next/cache";
+
+export async function updateWarga(formData: FormData) {
+  const id = formData.get("id");
+  const fullName = formData.get("full_name") as string;
+  const gender = formData.get("gender") as string;
+  const dob = formData.get("dob") as string;
+  const address = formData.get("address") as string;
+  const jobStatus = formData.get("job_status") as string;
+  const maritalStatus = formData.get("marital_status") as string;
+  const phone = formData.get("phone") as string;
+  const email = formData.get("email") as string;
+
+  if (id) {
+    await pool.execute(
+      'UPDATE users SET full_name=?, gender=?, dob=?, address=?, job_status=?, marital_status=?, phone=?, email=? WHERE id=?',
+      [fullName, gender, dob, address, jobStatus, maritalStatus, phone, email, id]
+    );
+    revalidatePath('/dashboard/warga');
+  }
+}
+
+export async function deleteWarga(formData: FormData) {
+  const id = formData.get("id");
+  if (id) {
+    await pool.execute('DELETE FROM users WHERE id=?', [id]);
+    revalidatePath('/dashboard/warga');
+  }
+}

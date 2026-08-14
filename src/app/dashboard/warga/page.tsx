@@ -1,5 +1,6 @@
 import pool from "@/lib/db";
 import { Users, Search } from "lucide-react";
+import WargaActions from "./WargaActions";
 
 export default async function WargaPage() {
   const [rows] = await pool.execute('SELECT * FROM users ORDER BY created_at DESC');
@@ -30,12 +31,13 @@ export default async function WargaPage() {
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Informasi Diri</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Kontak</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Alamat Lengkap</th>
+                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Aksi</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-slate-200">
               {users.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-12 text-center text-sm text-slate-500">
+                  <td colSpan={5} className="px-6 py-12 text-center text-sm text-slate-500">
                     <Users className="mx-auto h-12 w-12 text-slate-300 mb-3" />
                     Belum ada data warga yang terdaftar.
                   </td>
@@ -66,6 +68,9 @@ export default async function WargaPage() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm text-slate-900">{user.address}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <WargaActions warga={user} />
                     </td>
                   </tr>
                 ))
