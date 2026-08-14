@@ -28,6 +28,17 @@ export default async function ProfilePage() {
   const [childRows] = await pool.execute('SELECT * FROM children WHERE user_id = ? ORDER BY created_at ASC', [userId]);
   const children = childRows as any[];
 
+  // Ambil data kesehatan anak
+  const [healthRows] = await pool.execute(
+    `SELECT ch.*, c.full_name as child_name, c.gender, c.dob as child_dob 
+     FROM child_health ch 
+     JOIN children c ON ch.child_id = c.id 
+     WHERE ch.user_id = ? 
+     ORDER BY ch.measurement_date DESC`,
+    [userId]
+  );
+  const childHealthRecords = healthRows as any[];
+
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
@@ -38,6 +49,7 @@ export default async function ProfilePage() {
         user={user} 
         spouses={spouses} 
         childrenData={children} 
+        childHealthRecords={childHealthRecords}
         isAdmin={role === 'admin'}
       />
     </div>

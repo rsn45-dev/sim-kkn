@@ -76,3 +76,30 @@ export async function deleteChild(formData: FormData) {
     revalidatePath('/dashboard/profile');
   }
 }
+
+export async function addChildHealth(formData: FormData) {
+  const session = await auth();
+  if (!session?.user) return;
+  const userId = (session.user as any).id;
+
+  const childId = formData.get("child_id");
+  const measurementDate = formData.get("measurement_date") as string;
+  const weightKg = formData.get("weight_kg") as string;
+  const heightCm = formData.get("height_cm") as string;
+  const notes = formData.get("notes") as string;
+
+  await pool.execute(
+    'INSERT INTO child_health (child_id, user_id, measurement_date, weight_kg, height_cm, notes) VALUES (?, ?, ?, ?, ?, ?)',
+    [childId, userId, measurementDate, weightKg, heightCm, notes || null]
+  );
+
+  revalidatePath('/dashboard/profile');
+}
+
+export async function deleteChildHealth(formData: FormData) {
+  const id = formData.get("id");
+  if (id) {
+    await pool.execute('DELETE FROM child_health WHERE id=?', [id]);
+    revalidatePath('/dashboard/profile');
+  }
+}

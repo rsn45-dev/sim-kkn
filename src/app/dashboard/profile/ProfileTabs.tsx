@@ -1,23 +1,49 @@
 "use client";
 
 import { useState } from "react";
-import { User, Users, Baby, HeartPulse, Edit2, Plus, Trash2, X } from "lucide-react";
-import { updateProfile, addSpouse, deleteSpouse, addChild, deleteChild } from "./actions";
+import { User, Users, Baby, HeartPulse, Edit2, Plus, Trash2, X, TrendingUp } from "lucide-react";
+import { updateProfile, addSpouse, deleteSpouse, addChild, deleteChild, addChildHealth, deleteChildHealth } from "./actions";
+
+function calcWHOStatus(gender: string, ageMonths: number, heightCm: number, weightKg: number) {
+  const pts = [
+    {m:0,bH:49.9,gH:49.1,bW:3.3,gW:3.2},{m:6,bH:67.6,gH:65.7,bW:7.9,gW:7.3},
+    {m:12,bH:75.7,gH:74.0,bW:9.6,gW:8.9},{m:24,bH:87.1,gH:85.5,bW:12.2,gW:11.5},
+    {m:36,bH:96.1,gH:95.1,bW:14.3,gW:13.9},{m:48,bH:103.3,gH:102.7,bW:16.3,gW:16.1},
+    {m:60,bH:110.0,gH:109.4,bW:18.3,gW:18.2}
+  ];
+  let lo = pts[0], hi = pts[pts.length-1];
+  for(let i=0;i<pts.length-1;i++) { if(ageMonths>=pts[i].m && ageMonths<=pts[i+1].m){lo=pts[i];hi=pts[i+1];break;} }
+  const r = (ageMonths-lo.m)/(hi.m-lo.m||1);
+  const mH = gender==='L'?lo.bH+(hi.bH-lo.bH)*r:lo.gH+(hi.gH-lo.gH)*r;
+  const mW = gender==='L'?lo.bW+(hi.bW-lo.bW)*r:lo.gW+(hi.gW-lo.gW)*r;
+  const zH = (heightCm-mH)/(mH*0.04);
+  const zW = (weightKg-mW)/(mW*0.11);
+  let tbStatus = 'Normal';
+  if(zH<-3) tbStatus='Sangat Pendek (Severely Stunted)';
+  else if(zH<-2) tbStatus='Pendek (Stunted)';
+  else if(zH>3) tbStatus='Tinggi';
+  let bbStatus = 'Berat Badan Normal';
+  if(zW<-3) bbStatus='Gizi Buruk';
+  else if(zW<-2) bbStatus='Gizi Kurang';
+  else if(zW>2) bbStatus='Risiko Berat Badan Lebih';
+  const isAlert = tbStatus.includes('Stunted')||bbStatus.includes('Gizi');
+  return { tbStatus, bbStatus, isAlert };
+}
 
 type Props = {
   user: any;
   spouses: any[];
   childrenData: any[];
+  childHealthRecords: any[];
   isAdmin: boolean;
 };
 
-export default function ProfileTabs({ user, spouses, childrenData, isAdmin }: Props) {
+export default function ProfileTabs({ user, spouses, childrenData, childHealthRecords, isAdmin }: Props) {
   const [activeTab, setActiveTab] = useState("profil");
-  
-  // Modals state
   const [editProfileOpen, setEditProfileOpen] = useState(false);
   const [addSpouseOpen, setAddSpouseOpen] = useState(false);
   const [addChildOpen, setAddChildOpen] = useState(false);
+  const [addHealthOpen, setAddHealthOpen] = useState(false);
 
   const isMarried = user.marital_status === "kawin";
 
@@ -250,13 +276,74 @@ export default function ProfileTabs({ user, spouses, childrenData, isAdmin }: Pr
         {/* KESEHATAN ANAK TAB */}
         {activeTab === "kesehatan_anak" && (
           <div className="space-y-6 animate-in fade-in duration-300">
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <HeartPulse className="w-16 h-16 text-slate-300 mb-4" />
-              <h3 className="text-lg font-bold text-slate-900">Rekam Kesehatan Anak</h3>
-              <p className="text-slate-500 max-w-sm mt-2">
-                Fitur pencatatan tinggi dan berat badan secara berkala akan segera tersedia di menu ini.
-              </p>
+            <div className="flex justify-between items-start">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900">Rekam Kesehatan Anak</h3>
+                <p className="text-sm text-slate-500">Riwayat pengukuran tinggi & berat badan anak.</p>
+              </div>
+              {childrenData.length > 0 && (
+                <button onClick={() => setAddHealthOpen(true)} className="inline-flex items-center gap-2 bg-blue-600 text-white hover:bg-blue-700 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors">
+                  <Plus className="w-4 h-4" />
+                  Input Pengukuran
+                </button>
+              )}
             </div>
+            {childrenData.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <Baby className="w-16 h-16 text-slate-300 mb-4" />
+                <p className="text-slate-500">Tambah data anak terlebih dahulu di tab Anak.</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto border border-slate-200 rounded-lg">
+                <table className="min-w-full divide-y divide-slate-200">
+                  <thead className="bg-slate-50">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Nama Anak</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Tgl Ukur</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">BB (kg)</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">TB (cm)</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Status TB/U</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Status BB/U</th>
+                      {isAdmin && <th className="px-4 py-3 text-right text-xs font-medium text-slate-500 uppercase">Aksi</th>}
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-slate-200">
+                    {childHealthRecords.length === 0 ? (
+                      <tr><td colSpan={isAdmin?7:6} className="px-4 py-8 text-center text-sm text-slate-500">Belum ada rekam kesehatan.</td></tr>
+                    ) : childHealthRecords.map(rec => {
+                      const dob = new Date(rec.child_dob);
+                      const mDate = new Date(rec.measurement_date);
+                      const ageMonths = (mDate.getFullYear()-dob.getFullYear())*12+(mDate.getMonth()-dob.getMonth());
+                      const {tbStatus, bbStatus, isAlert} = calcWHOStatus(rec.gender, ageMonths, parseFloat(rec.height_cm), parseFloat(rec.weight_kg));
+                      return (
+                        <tr key={rec.id} className={isAlert ? 'bg-red-50' : ''}>
+                          <td className="px-4 py-3 text-sm font-medium text-slate-900">{rec.child_name}</td>
+                          <td className="px-4 py-3 text-sm text-slate-500">{new Date(rec.measurement_date).toLocaleDateString('id-ID')}</td>
+                          <td className="px-4 py-3 text-sm text-slate-700 font-semibold">{rec.weight_kg}</td>
+                          <td className="px-4 py-3 text-sm text-slate-700 font-semibold">{rec.height_cm}</td>
+                          <td className="px-4 py-3 text-sm">
+                            <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${tbStatus.includes('Stunted')||tbStatus.includes('Pendek')?'bg-red-100 text-red-700':'bg-emerald-100 text-emerald-700'}`}>{tbStatus}</span>
+                          </td>
+                          <td className="px-4 py-3 text-sm">
+                            <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${bbStatus.includes('Gizi')?'bg-orange-100 text-orange-700':'bg-emerald-100 text-emerald-700'}`}>{bbStatus}</span>
+                          </td>
+                          {isAdmin && (
+                            <td className="px-4 py-3 text-right">
+                              <form action={deleteChildHealth}>
+                                <input type="hidden" name="id" value={rec.id} />
+                                <button type="submit" className="text-red-600 bg-red-50 p-1.5 rounded-lg" onClick={e=>!confirm('Hapus rekam ini?')&&e.preventDefault()}>
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </form>
+                            </td>
+                          )}
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -356,6 +443,49 @@ export default function ProfileTabs({ user, spouses, childrenData, isAdmin }: Pr
               <div className="pt-4 flex justify-end gap-3 border-t border-slate-200 mt-6">
                 <button type="button" onClick={() => setAddSpouseOpen(false)} className="px-4 py-2 border rounded-md">Batal</button>
                 <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-md">Simpan</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Input Pengukuran Kesehatan */}
+      {addHealthOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
+            <div className="flex justify-between items-center px-6 py-4 border-b border-slate-200">
+              <h3 className="text-lg font-bold text-slate-900">Input Pengukuran Kesehatan</h3>
+              <button onClick={() => setAddHealthOpen(false)} className="text-slate-400 hover:text-slate-500"><X className="w-5 h-5" /></button>
+            </div>
+            <form action={async (fd) => { await addChildHealth(fd); setAddHealthOpen(false); }} className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Nama Anak</label>
+                <select name="child_id" required className="w-full px-3 py-2 border border-slate-300 rounded-md">
+                  <option value="">-- Pilih Anak --</option>
+                  {childrenData.map(c => <option key={c.id} value={c.id}>{c.full_name}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Tanggal Pengukuran</label>
+                <input type="date" name="measurement_date" required defaultValue={new Date().toISOString().split('T')[0]} className="w-full px-3 py-2 border border-slate-300 rounded-md" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Berat Badan (kg)</label>
+                  <input type="number" step="0.1" name="weight_kg" required placeholder="12.5" className="w-full px-3 py-2 border border-slate-300 rounded-md" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Tinggi Badan (cm)</label>
+                  <input type="number" step="0.1" name="height_cm" required placeholder="85.0" className="w-full px-3 py-2 border border-slate-300 rounded-md" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Catatan (opsional)</label>
+                <textarea name="notes" rows={2} className="w-full px-3 py-2 border border-slate-300 rounded-md" />
+              </div>
+              <div className="pt-4 flex justify-end gap-3 border-t border-slate-200">
+                <button type="button" onClick={() => setAddHealthOpen(false)} className="px-4 py-2 border rounded-md">Batal</button>
+                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-md">Simpan & Analisa</button>
               </div>
             </form>
           </div>
