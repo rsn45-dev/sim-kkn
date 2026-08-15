@@ -3,32 +3,7 @@
 import { useState } from "react";
 import { User, Users, Baby, HeartPulse, Edit2, Plus, Trash2, X, TrendingUp } from "lucide-react";
 import { updateProfile, addSpouse, deleteSpouse, addChild, deleteChild, addChildHealth, deleteChildHealth } from "./actions";
-
-function calcWHOStatus(gender: string, ageMonths: number, heightCm: number, weightKg: number) {
-  const pts = [
-    {m:0,bH:49.9,gH:49.1,bW:3.3,gW:3.2},{m:6,bH:67.6,gH:65.7,bW:7.9,gW:7.3},
-    {m:12,bH:75.7,gH:74.0,bW:9.6,gW:8.9},{m:24,bH:87.1,gH:85.5,bW:12.2,gW:11.5},
-    {m:36,bH:96.1,gH:95.1,bW:14.3,gW:13.9},{m:48,bH:103.3,gH:102.7,bW:16.3,gW:16.1},
-    {m:60,bH:110.0,gH:109.4,bW:18.3,gW:18.2}
-  ];
-  let lo = pts[0], hi = pts[pts.length-1];
-  for(let i=0;i<pts.length-1;i++) { if(ageMonths>=pts[i].m && ageMonths<=pts[i+1].m){lo=pts[i];hi=pts[i+1];break;} }
-  const r = (ageMonths-lo.m)/(hi.m-lo.m||1);
-  const mH = gender==='L'?lo.bH+(hi.bH-lo.bH)*r:lo.gH+(hi.gH-lo.gH)*r;
-  const mW = gender==='L'?lo.bW+(hi.bW-lo.bW)*r:lo.gW+(hi.gW-lo.gW)*r;
-  const zH = (heightCm-mH)/(mH*0.04);
-  const zW = (weightKg-mW)/(mW*0.11);
-  let tbStatus = 'Normal';
-  if(zH<-3) tbStatus='Sangat Pendek (Severely Stunted)';
-  else if(zH<-2) tbStatus='Pendek (Stunted)';
-  else if(zH>3) tbStatus='Tinggi';
-  let bbStatus = 'Berat Badan Normal';
-  if(zW<-3) bbStatus='Gizi Buruk';
-  else if(zW<-2) bbStatus='Gizi Kurang';
-  else if(zW>2) bbStatus='Risiko Berat Badan Lebih';
-  const isAlert = tbStatus.includes('Stunted')||bbStatus.includes('Gizi');
-  return { tbStatus, bbStatus, isAlert };
-}
+import { calcHealthStatus } from "@/lib/healthCalc";
 
 type Props = {
   user: any;
@@ -311,21 +286,26 @@ export default function ProfileTabs({ user, spouses, childrenData, childHealthRe
                     {childHealthRecords.length === 0 ? (
                       <tr><td colSpan={isAdmin?7:6} className="px-4 py-8 text-center text-sm text-slate-500">Belum ada rekam kesehatan.</td></tr>
                     ) : childHealthRecords.map(rec => {
-                      const dob = new Date(rec.child_dob);
-                      const mDate = new Date(rec.measurement_date);
-                      const ageMonths = (mDate.getFullYear()-dob.getFullYear())*12+(mDate.getMonth()-dob.getMonth());
-                      const {tbStatus, bbStatus, isAlert} = calcWHOStatus(rec.gender, ageMonths, parseFloat(rec.height_cm), parseFloat(rec.weight_kg));
+                      const res = calcHealthStatus(
+                        rec.gender,
+                        new Date(rec.child_dob).toISOString().split('T')[0],
+                        new Date(rec.measurement_date).toISOString().split('T')[0],
+                        parseFloat(rec.height_cm),
+                        parseFloat(rec.weight_kg)
+                      );
                       return (
-                        <tr key={rec.id} className={isAlert ? 'bg-red-50' : ''}>
+                        <tr key={rec.id} className={res.alertLevel === 'danger' ? 'bg-red-50' : res.alertLevel === 'warning' ? 'bg-orange-50' : ''}>
                           <td className="px-4 py-3 text-sm font-medium text-slate-900">{rec.child_name}</td>
                           <td className="px-4 py-3 text-sm text-slate-500">{new Date(rec.measurement_date).toLocaleDateString('id-ID')}</td>
                           <td className="px-4 py-3 text-sm text-slate-700 font-semibold">{rec.weight_kg}</td>
                           <td className="px-4 py-3 text-sm text-slate-700 font-semibold">{rec.height_cm}</td>
-                          <td className="px-4 py-3 text-sm">
-                            <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${tbStatus.includes('Stunted')||tbStatus.includes('Pendek')?'bg-red-100 text-red-700':'bg-emerald-100 text-emerald-700'}`}>{tbStatus}</span>
+                          <td className="px-4 py-3 text-xs">
+                            <span className={`px-2 py-0.5 rounded-full font-semibold ${
+                              res.alertLevel==='danger'?'bg-red-100 text-red-700':res.alertLevel==='warning'?'bg-orange-100 text-orange-700':'bg-emerald-100 text-emerald-700'
+                            }`}>{res.primaryStatus}</span>
                           </td>
-                          <td className="px-4 py-3 text-sm">
-                            <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${bbStatus.includes('Gizi')?'bg-orange-100 text-orange-700':'bg-emerald-100 text-emerald-700'}`}>{bbStatus}</span>
+                          <td className="px-4 py-3 text-xs text-slate-500">
+                            <span className="font-mono">{res.interpretation}</span>
                           </td>
                           {isAdmin && (
                             <td className="px-4 py-3 text-right">
