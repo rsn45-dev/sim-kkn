@@ -12,7 +12,8 @@ export type HealthResult = {
   secondaryStatus?: string;
   bmi?: number;
   interpretation: string;
-  friendlyDetail: string;   // Penjelasan mudah dipahami orang tua/pengguna
+  friendlyDetail: string;
+  idealRange: string;        // Penjelasan rentang normal/ideal
   recommendation: string;
   isAlert: boolean;
   alertLevel: 'normal' | 'warning' | 'danger';
@@ -107,6 +108,7 @@ function calcWHOZScore(gender: string, ageMonths: number, heightCm: number, weig
     secondaryStatus: `BB/U: ${bbStatus}`,
     interpretation: `Z-Score TB: ${zH.toFixed(2)} | Z-Score BB: ${zW.toFixed(2)}`,
     friendlyDetail,
+    idealRange: `Tinggi badan ideal usia ${ageStr}: sekitar ${medH.toFixed(0)} cm | Berat badan ideal: sekitar ${medW.toFixed(1)} kg`,
     recommendation,
     isAlert,
     alertLevel,
@@ -158,20 +160,23 @@ function calcIMTPerAge(gender: string, ageYears: number, heightCm: number, weigh
   else if (status === 'Gemuk')        recommendation = 'IMT di atas normal. Kurangi konsumsi makanan tinggi gula dan lemak. Tingkatkan aktivitas fisik dan konsultasikan ke tenaga kesehatan.';
   else                                recommendation = 'IMT menunjukkan obesitas. Konsultasikan segera ke dokter atau ahli gizi untuk program penurunan berat badan yang aman sesuai usia.';
 
+  // Expand IMT in friendlyDetail
   let friendlyDetail: string;
   const bmiRounded = bmi.toFixed(1);
-  if      (status === 'Sangat Kurus') friendlyDetail = `IMT anak adalah ${bmiRounded} kg/m². Untuk anak usia ${ageYears.toFixed(0)} tahun, angka ini jauh di bawah normal. Berat badan sangat perlu ditingkatkan dengan bantuan dokter.`;
-  else if (status === 'Kurus')        friendlyDetail = `IMT anak adalah ${bmiRounded} kg/m². Untuk usia ${ageYears.toFixed(0)} tahun, angka ini sedikit di bawah normal. Perlu penambahan asupan gizi.`;
-  else if (status === 'Normal')       friendlyDetail = `IMT anak adalah ${bmiRounded} kg/m². Angka ini ideal untuk usia ${ageYears.toFixed(0)} tahun. Pertahankan pola makan bergizi seimbang.`;
-  else if (status === 'Gemuk')        friendlyDetail = `IMT anak adalah ${bmiRounded} kg/m². Untuk usia ${ageYears.toFixed(0)} tahun, angka ini sedikit di atas normal. Perlu pengaturan pola makan dan aktivitas fisik.`;
-  else                                friendlyDetail = `IMT anak adalah ${bmiRounded} kg/m². Untuk usia ${ageYears.toFixed(0)} tahun, angka ini menunjukkan kelebihan berat badan yang signifikan. Segera konsultasi ke dokter.`;
+  const bmiLabel = 'Indeks Massa Tubuh (IMT)';
+  if      (status === 'Sangat Kurus') friendlyDetail = `${bmiLabel} anak adalah ${bmiRounded} kg/m². Untuk anak usia ${ageYears.toFixed(0)} tahun, angka ini jauh di bawah normal. Berat badan sangat perlu ditingkatkan dengan bantuan dokter.`;
+  else if (status === 'Kurus')        friendlyDetail = `${bmiLabel} anak adalah ${bmiRounded} kg/m². Untuk usia ${ageYears.toFixed(0)} tahun, angka ini sedikit di bawah normal. Perlu penambahan asupan gizi.`;
+  else if (status === 'Normal')       friendlyDetail = `${bmiLabel} anak adalah ${bmiRounded} kg/m². Angka ini ideal untuk usia ${ageYears.toFixed(0)} tahun. Pertahankan pola makan bergizi seimbang.`;
+  else if (status === 'Gemuk')        friendlyDetail = `${bmiLabel} anak adalah ${bmiRounded} kg/m². Untuk usia ${ageYears.toFixed(0)} tahun, angka ini sedikit di atas normal. Perlu pengaturan pola makan dan aktivitas fisik.`;
+  else                                friendlyDetail = `${bmiLabel} anak adalah ${bmiRounded} kg/m². Untuk usia ${ageYears.toFixed(0)} tahun, angka ini menunjukkan kelebihan berat badan yang signifikan. Segera konsultasi ke dokter.`;
 
   return {
-    method: `IMT/U – BMI for Age (Usia ${ageYears.toFixed(0)} tahun)`,
+    method: `IMT/U – Indeks Massa Tubuh menurut Umur (Usia ${ageYears.toFixed(0)} tahun)`,
     primaryStatus: status,
     bmi: parseFloat(bmi.toFixed(2)),
     interpretation: `IMT: ${bmi.toFixed(1)} kg/m² | Median: ${median} | Z-Score: ${z.toFixed(2)}`,
     friendlyDetail,
+    idealRange: `Nilai IMT normal untuk anak usia ${ageYears.toFixed(0)} tahun: sekitar ${(median - ref.sd).toFixed(1)} – ${(median + ref.sd).toFixed(1)} kg/m² (IMT anak: ${bmiRounded} kg/m²)`,
     recommendation,
     isAlert,
     alertLevel,
@@ -204,18 +209,20 @@ function calcIMTDewasa(heightCm: number, weightKg: number): HealthResult {
 
   let friendlyDetail: string;
   const bmiRounded = bmi.toFixed(1);
-  if      (bmi < 17.0) friendlyDetail = `IMT Anda adalah ${bmiRounded} kg/m². Angka ini menunjukkan kekurangan berat badan yang cukup serius. Disarankan segera berkonsultasi dengan dokter.`;
-  else if (bmi < 18.5) friendlyDetail = `IMT Anda adalah ${bmiRounded} kg/m². Berat badan Anda sedikit di bawah ideal. Tingkatkan asupan makanan bergizi secara teratur.`;
-  else if (bmi < 25.0) friendlyDetail = `IMT Anda adalah ${bmiRounded} kg/m². Berat badan Anda ideal! Pertahankan dengan pola makan sehat dan olahraga rutin.`;
-  else if (bmi < 27.0) friendlyDetail = `IMT Anda adalah ${bmiRounded} kg/m². Berat badan Anda sedikit di atas ideal. Perlu sedikit pengurangan kalori dan penambahan aktivitas fisik.`;
-  else                  friendlyDetail = `IMT Anda adalah ${bmiRounded} kg/m². Berat badan Anda tergolong berlebih. Disarankan berkonsultasi dengan dokter atau ahli gizi untuk program yang tepat.`;
+  const bmiLabel = 'Indeks Massa Tubuh (IMT)';
+  if      (bmi < 17.0) friendlyDetail = `${bmiLabel} Anda adalah ${bmiRounded} kg/m². Angka ini menunjukkan kekurangan berat badan yang cukup serius. Disarankan segera berkonsultasi dengan dokter.`;
+  else if (bmi < 18.5) friendlyDetail = `${bmiLabel} Anda adalah ${bmiRounded} kg/m². Berat badan Anda sedikit di bawah ideal. Tingkatkan asupan makanan bergizi secara teratur.`;
+  else if (bmi < 25.0) friendlyDetail = `${bmiLabel} Anda adalah ${bmiRounded} kg/m². Berat badan Anda ideal! Pertahankan dengan pola makan sehat dan olahraga rutin.`;
+  else if (bmi < 27.0) friendlyDetail = `${bmiLabel} Anda adalah ${bmiRounded} kg/m². Berat badan Anda sedikit di atas ideal. Perlu sedikit pengurangan kalori dan penambahan aktivitas fisik.`;
+  else                  friendlyDetail = `${bmiLabel} Anda adalah ${bmiRounded} kg/m². Berat badan Anda tergolong berlebih. Disarankan berkonsultasi dengan dokter atau ahli gizi untuk program yang tepat.`;
 
   return {
-    method: 'IMT (Indeks Massa Tubuh) – Dewasa',
+    method: 'Indeks Massa Tubuh (IMT) – Standar Dewasa',
     primaryStatus: status,
     bmi: parseFloat(bmi.toFixed(2)),
     interpretation: `IMT: ${bmi.toFixed(1)} kg/m²`,
     friendlyDetail,
+    idealRange: `Rentang IMT normal (dewasa): 18.5 – 24.9 kg/m² | Nilai IMT Anda: ${bmiRounded} kg/m²`,
     recommendation,
     isAlert,
     alertLevel,
@@ -239,7 +246,7 @@ export function calcHealthStatus(
   const ageMonths = ageYears * 12;
 
   if (ageMonths < 0) {
-    return { method:'–', primaryStatus:'–', interpretation:'Tanggal tidak valid', friendlyDetail:'Tanggal tidak valid.', recommendation:'', isAlert:false, alertLevel:'normal' };
+    return { method:'–', primaryStatus:'–', interpretation:'Tanggal tidak valid', friendlyDetail:'Tanggal tidak valid.', idealRange:'–', recommendation:'', isAlert:false, alertLevel:'normal' };
   }
 
   if (ageMonths <= 59) {

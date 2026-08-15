@@ -269,59 +269,67 @@ export default function ProfileTabs({ user, spouses, childrenData, childHealthRe
                 <p className="text-slate-500">Tambah data anak terlebih dahulu di tab Anak.</p>
               </div>
             ) : (
-              <div className="overflow-x-auto border border-slate-200 rounded-lg">
-                <table className="min-w-full divide-y divide-slate-200">
-                  <thead className="bg-slate-50">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Nama Anak</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Tgl Ukur</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">BB (kg)</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">TB (cm)</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Status Gizi</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Penjelasan</th>
-                      {isAdmin && <th className="px-4 py-3 text-right text-xs font-medium text-slate-500 uppercase">Aksi</th>}
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-slate-200">
-                    {childHealthRecords.length === 0 ? (
-                      <tr><td colSpan={isAdmin?7:6} className="px-4 py-8 text-center text-sm text-slate-500">Belum ada rekam kesehatan.</td></tr>
-                    ) : childHealthRecords.map(rec => {
-                      const res = calcHealthStatus(
-                        rec.gender,
-                        new Date(rec.child_dob).toISOString().split('T')[0],
-                        new Date(rec.measurement_date).toISOString().split('T')[0],
-                        parseFloat(rec.height_cm),
-                        parseFloat(rec.weight_kg)
-                      );
-                      return (
-                        <tr key={rec.id} className={res.alertLevel === 'danger' ? 'bg-red-50' : res.alertLevel === 'warning' ? 'bg-orange-50' : ''}>
-                          <td className="px-4 py-3 text-sm font-medium text-slate-900">{rec.child_name}</td>
-                          <td className="px-4 py-3 text-sm text-slate-500">{new Date(rec.measurement_date).toLocaleDateString('id-ID')}</td>
-                          <td className="px-4 py-3 text-sm text-slate-700 font-semibold">{rec.weight_kg}</td>
-                          <td className="px-4 py-3 text-sm text-slate-700 font-semibold">{rec.height_cm}</td>
-                          <td className="px-4 py-3 text-xs">
-                            <span className={`px-2 py-0.5 rounded-full font-semibold ${
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {childHealthRecords.length === 0 ? (
+                  <div className="col-span-full py-12 text-center text-sm text-slate-500 bg-slate-50 rounded-xl border border-slate-200 border-dashed">
+                    Belum ada rekam kesehatan.
+                  </div>
+                ) : childHealthRecords.map(rec => {
+                  const res = calcHealthStatus(
+                    rec.gender,
+                    new Date(rec.child_dob).toISOString().split('T')[0],
+                    new Date(rec.measurement_date).toISOString().split('T')[0],
+                    parseFloat(rec.height_cm),
+                    parseFloat(rec.weight_kg)
+                  );
+                  return (
+                    <div key={rec.id} className={`flex flex-col rounded-xl border shadow-sm overflow-hidden ${res.alertLevel === 'danger' ? 'border-red-200 bg-red-50/50' : res.alertLevel === 'warning' ? 'border-orange-200 bg-orange-50/50' : 'border-slate-200 bg-white'}`}>
+                      <div className={`px-5 py-4 border-b flex justify-between items-start ${res.alertLevel === 'danger' ? 'border-red-100 bg-red-50' : res.alertLevel === 'warning' ? 'border-orange-100 bg-orange-50' : 'border-slate-100 bg-slate-50'}`}>
+                        <div>
+                          <h4 className="font-bold text-slate-900">{rec.child_name}</h4>
+                          <p className="text-xs text-slate-500 mt-0.5">Tgl Ukur: {new Date(rec.measurement_date).toLocaleDateString('id-ID')}</p>
+                        </div>
+                        {isAdmin && (
+                          <form action={deleteChildHealth}>
+                            <input type="hidden" name="id" value={rec.id} />
+                            <button type="submit" className="text-red-500 hover:text-red-700 hover:bg-red-100 p-2 rounded-lg transition-colors" onClick={e=>!confirm('Hapus rekam ini?')&&e.preventDefault()} title="Hapus Data">
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </form>
+                        )}
+                      </div>
+                      
+                      <div className="p-5 flex-1 flex flex-col gap-4">
+                        <div className="flex flex-wrap gap-4">
+                          <div>
+                            <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Berat</span>
+                            <span className="font-semibold text-slate-800">{rec.weight_kg} kg</span>
+                          </div>
+                          <div>
+                            <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tinggi</span>
+                            <span className="font-semibold text-slate-800">{rec.height_cm} cm</span>
+                          </div>
+                          <div>
+                            <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Status Gizi</span>
+                            <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold mt-0.5 ${
                               res.alertLevel==='danger'?'bg-red-100 text-red-700':res.alertLevel==='warning'?'bg-orange-100 text-orange-700':'bg-emerald-100 text-emerald-700'
                             }`}>{res.primaryStatus}</span>
-                          </td>
-                          <td className="px-4 py-3 text-xs text-slate-600 max-w-xs">
-                            {res.friendlyDetail}
-                          </td>
-                          {isAdmin && (
-                            <td className="px-4 py-3 text-right">
-                              <form action={deleteChildHealth}>
-                                <input type="hidden" name="id" value={rec.id} />
-                                <button type="submit" className="text-red-600 bg-red-50 p-1.5 rounded-lg" onClick={e=>!confirm('Hapus rekam ini?')&&e.preventDefault()}>
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
-                              </form>
-                            </td>
-                          )}
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                          </div>
+                        </div>
+
+                        <div className="bg-white/60 rounded-lg p-3 border border-slate-100">
+                          <p className="text-sm text-slate-700 leading-relaxed mb-2">{res.friendlyDetail}</p>
+                          <p className="text-xs text-slate-500 font-medium">{res.idealRange}</p>
+                        </div>
+                        
+                        <div className={`mt-auto rounded-lg p-3 text-sm leading-relaxed ${res.alertLevel === 'danger' ? 'bg-red-100/50 text-red-800' : res.alertLevel === 'warning' ? 'bg-orange-100/50 text-orange-800' : 'bg-blue-50 text-blue-800'}`}>
+                          <span className="font-semibold block mb-1">Rekomendasi:</span>
+                          {res.recommendation}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
