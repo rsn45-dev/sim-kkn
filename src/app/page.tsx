@@ -4,23 +4,36 @@ import { useState } from "react";
 import Link from "next/link";
 import { Activity, LogIn, Calculator, Info, Baby, AlertTriangle, ChevronDown, ChevronUp, BookOpen } from "lucide-react";
 import { calcHealthStatus, type HealthResult } from "@/lib/healthCalc";
+import { saveGuestHealthCheck } from "@/app/actions/guest";
 
 export default function Home() {
   const [formData, setFormData] = useState({ nama: "", tglLahir: "", gender: "L", berat: "", tinggi: "" });
   const [result, setResult] = useState<(HealthResult & { nama: string }) | null>(null);
   const [showMethodInfo, setShowMethodInfo] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.tglLahir || !formData.tinggi || !formData.berat) return;
+    const height = parseFloat(formData.tinggi);
+    const weight = parseFloat(formData.berat);
+    
     const r = calcHealthStatus(
       formData.gender,
       formData.tglLahir,
       new Date().toISOString().split('T')[0],
-      parseFloat(formData.tinggi),
-      parseFloat(formData.berat)
+      height,
+      weight
     );
     setResult({ ...r, nama: formData.nama });
+
+    // Simpan ke database laporan non-terdaftar (guest)
+    await saveGuestHealthCheck({
+      nama: formData.nama,
+      gender: formData.gender,
+      tglLahir: formData.tglLahir,
+      tinggi: height,
+      berat: weight
+    });
   };
 
   const alertBg   = result?.alertLevel === 'danger'  ? 'bg-red-50 border-red-200'    : result?.alertLevel === 'warning' ? 'bg-orange-50 border-orange-200' : 'bg-emerald-50 border-emerald-200';
