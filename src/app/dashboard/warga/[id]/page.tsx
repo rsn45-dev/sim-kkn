@@ -5,13 +5,14 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
-export default async function WargaProfilePage({ params }: { params: { id: string } }) {
+export default async function WargaProfilePage({ params }: { params: Promise<{ id: string }> | { id: string } }) {
   const session = await auth();
   if (!session?.user || (session.user as any).role !== 'admin') {
     redirect("/login");
   }
   
-  const targetUserId = params.id;
+  const resolvedParams = await params;
+  const targetUserId = resolvedParams.id;
 
   // Ambil data user
   const [userRows] = await pool.execute('SELECT * FROM users WHERE id = ?', [targetUserId]);
