@@ -277,8 +277,8 @@ export default function ProfileTabs({ user, spouses, childrenData, childHealthRe
                       <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Tgl Ukur</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">BB (kg)</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">TB (cm)</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Status TB/U</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Status BB/U</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Status Gizi</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Penjelasan</th>
                       {isAdmin && <th className="px-4 py-3 text-right text-xs font-medium text-slate-500 uppercase">Aksi</th>}
                     </tr>
                   </thead>
@@ -304,8 +304,8 @@ export default function ProfileTabs({ user, spouses, childrenData, childHealthRe
                               res.alertLevel==='danger'?'bg-red-100 text-red-700':res.alertLevel==='warning'?'bg-orange-100 text-orange-700':'bg-emerald-100 text-emerald-700'
                             }`}>{res.primaryStatus}</span>
                           </td>
-                          <td className="px-4 py-3 text-xs text-slate-500">
-                            <span className="font-mono">{res.interpretation}</span>
+                          <td className="px-4 py-3 text-xs text-slate-600 max-w-xs">
+                            {res.friendlyDetail}
                           </td>
                           {isAdmin && (
                             <td className="px-4 py-3 text-right">

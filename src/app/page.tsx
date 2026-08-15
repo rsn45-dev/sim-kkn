@@ -121,9 +121,11 @@ export default function Home() {
                   </div>
 
                   <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Detail Kalkulasi</p>
-                    <p className="text-sm text-slate-700 font-mono">{result.interpretation}</p>
-                    {result.bmi && <p className="text-sm text-slate-500 mt-1">IMT: <span className="font-bold text-slate-800">{result.bmi} kg/m²</span></p>}
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Apa artinya?</p>
+                    <p className="text-sm text-slate-700 leading-relaxed">{result.friendlyDetail}</p>
+                    {result.bmi && (
+                      <p className="text-xs text-slate-400 mt-2 font-mono">Nilai IMT: {result.bmi} kg/m² · Metode: {result.method}</p>
+                    )}
                   </div>
 
                   {/* Recommendation */}
