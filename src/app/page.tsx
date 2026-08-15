@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Activity, LogIn, Calculator, Info, Baby, AlertTriangle } from "lucide-react";
+import { Activity, LogIn, Calculator, Info, Baby, AlertTriangle, ChevronDown, ChevronUp, BookOpen } from "lucide-react";
 import { calcHealthStatus, type HealthResult } from "@/lib/healthCalc";
 
 export default function Home() {
   const [formData, setFormData] = useState({ nama: "", tglLahir: "", gender: "L", berat: "", tinggi: "" });
   const [result, setResult] = useState<(HealthResult & { nama: string }) | null>(null);
+  const [showMethodInfo, setShowMethodInfo] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -127,6 +128,75 @@ export default function Home() {
                       <p className="text-xs text-slate-400 mt-2 font-mono">Nilai IMT: {result.bmi} kg/m² · Metode: {result.method}</p>
                     )}
                   </div>
+
+                  {/* Penjelasan IMT — muncul jika metode menggunakan IMT */}
+                  {result.bmi && (
+                    <div className="border border-indigo-200 rounded-xl overflow-hidden">
+                      <button
+                        type="button"
+                        onClick={() => setShowMethodInfo(!showMethodInfo)}
+                        className="w-full flex items-center justify-between px-4 py-3 bg-indigo-50 text-indigo-800 text-sm font-medium hover:bg-indigo-100 transition-colors"
+                      >
+                        <div className="flex items-center gap-2">
+                          <BookOpen className="w-4 h-4" />
+                          <span>Apa itu {result.method.includes('Dewasa') ? 'IMT (Indeks Massa Tubuh)' : 'IMT/U (IMT menurut Umur)'}?</span>
+                        </div>
+                        {showMethodInfo ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                      </button>
+                      {showMethodInfo && (
+                        <div className="p-4 bg-white text-sm text-slate-700 space-y-3 leading-relaxed">
+                          {result.method.includes('Dewasa') ? (
+                            <>
+                              <p><strong>IMT (Indeks Massa Tubuh)</strong> adalah cara paling umum untuk mengetahui apakah berat badan seseorang sudah ideal sesuai dengan tinggi badannya.</p>
+                              <p>Rumusnya: <span className="font-mono bg-slate-100 px-1 rounded">IMT = Berat (kg) ÷ Tinggi² (m)</span></p>
+                              <p>Contoh: berat 60 kg, tinggi 1.65 m → IMT = 60 ÷ (1.65 × 1.65) = <strong>22.0 kg/m²</strong></p>
+                              <div className="grid grid-cols-2 gap-2 mt-2">
+                                <div className="bg-blue-50 rounded-lg p-2 text-xs text-center">
+                                  <p className="font-bold text-blue-700">&lt; 17.0</p><p>Kurus Berat</p>
+                                </div>
+                                <div className="bg-sky-50 rounded-lg p-2 text-xs text-center">
+                                  <p className="font-bold text-sky-700">17.0 – 18.4</p><p>Kurus</p>
+                                </div>
+                                <div className="bg-emerald-50 rounded-lg p-2 text-xs text-center">
+                                  <p className="font-bold text-emerald-700">18.5 – 24.9</p><p>Normal / Ideal</p>
+                                </div>
+                                <div className="bg-orange-50 rounded-lg p-2 text-xs text-center">
+                                  <p className="font-bold text-orange-700">25.0 – 26.9</p><p>Gemuk</p>
+                                </div>
+                                <div className="bg-red-50 rounded-lg p-2 text-xs text-center col-span-2">
+                                  <p className="font-bold text-red-700">&gt; 27.0</p><p>Obesitas</p>
+                                </div>
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              <p><strong>IMT/U (IMT menurut Umur)</strong> digunakan untuk anak dan remaja usia 5–18 tahun, karena nilai IMT ideal berbeda-beda tergantung usia dan jenis kelamin.</p>
+                              <p>Rumus IMT-nya sama: <span className="font-mono bg-slate-100 px-1 rounded">IMT = Berat (kg) ÷ Tinggi² (m)</span></p>
+                              <p>Namun hasilnya dibandingkan dengan <strong>tabel standar WHO</strong> sesuai usia anak, bukan angka tetap seperti orang dewasa.</p>
+                              <div className="grid grid-cols-2 gap-2 mt-2">
+                                <div className="bg-red-50 rounded-lg p-2 text-xs text-center">
+                                  <p className="font-bold text-red-700">Z-Score &lt; -3</p><p>Sangat Kurus</p>
+                                </div>
+                                <div className="bg-orange-50 rounded-lg p-2 text-xs text-center">
+                                  <p className="font-bold text-orange-700">-3 s/d -2</p><p>Kurus</p>
+                                </div>
+                                <div className="bg-emerald-50 rounded-lg p-2 text-xs text-center">
+                                  <p className="font-bold text-emerald-700">-2 s/d +1</p><p>Normal / Ideal</p>
+                                </div>
+                                <div className="bg-orange-50 rounded-lg p-2 text-xs text-center">
+                                  <p className="font-bold text-orange-700">+1 s/d +2</p><p>Gemuk</p>
+                                </div>
+                                <div className="bg-red-50 rounded-lg p-2 text-xs text-center col-span-2">
+                                  <p className="font-bold text-red-700">&gt; +2</p><p>Obesitas</p>
+                                </div>
+                              </div>
+                            </>
+                          )}
+                          <p className="text-xs text-slate-400">*Standar berdasarkan referensi WHO dan Kemenkes RI.</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   {/* Recommendation */}
                   <div className={`rounded-xl p-4 flex gap-3 border ${recBg}`}>
