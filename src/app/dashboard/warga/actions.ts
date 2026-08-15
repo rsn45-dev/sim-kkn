@@ -26,6 +26,9 @@ export async function updateWarga(formData: FormData) {
 export async function deleteWarga(formData: FormData) {
   const id = formData.get("id");
   if (id) {
+    await pool.execute('DELETE FROM child_health WHERE user_id=?', [id]);
+    await pool.execute('DELETE FROM children WHERE user_id=?', [id]);
+    await pool.execute('DELETE FROM spouses WHERE user_id=?', [id]);
     await pool.execute('DELETE FROM users WHERE id=?', [id]);
     revalidatePath('/dashboard/warga');
   }

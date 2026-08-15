@@ -350,6 +350,7 @@ export default function ProfileTabs({ user, spouses, childrenData, childHealthRe
             </div>
             
             <form action={async (fd) => { await updateProfile(fd); setEditProfileOpen(false); }} className="p-6 space-y-4">
+              <input type="hidden" name="target_user_id" value={user.id} />
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Nama Lengkap</label>
                 <input type="text" name="full_name" defaultValue={user.full_name} required className="w-full px-3 py-2 border border-slate-300 rounded-md" />
@@ -413,6 +414,7 @@ export default function ProfileTabs({ user, spouses, childrenData, childHealthRe
               </button>
             </div>
             <form action={async (fd) => { await addSpouse(fd); setAddSpouseOpen(false); }} className="p-6 space-y-4">
+              <input type="hidden" name="target_user_id" value={user.id} />
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Nama Lahir</label>
                 <input type="text" name="full_name" required className="w-full px-3 py-2 border border-slate-300 rounded-md" />
@@ -446,6 +448,7 @@ export default function ProfileTabs({ user, spouses, childrenData, childHealthRe
               <button onClick={() => setAddHealthOpen(false)} className="text-slate-400 hover:text-slate-500"><X className="w-5 h-5" /></button>
             </div>
             <form action={async (fd) => { await addChildHealth(fd); setAddHealthOpen(false); }} className="p-6 space-y-4">
+              <input type="hidden" name="target_user_id" value={user.id} />
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Nama Anak</label>
                 <select name="child_id" required className="w-full px-3 py-2 border border-slate-300 rounded-md">
@@ -491,6 +494,7 @@ export default function ProfileTabs({ user, spouses, childrenData, childHealthRe
               </button>
             </div>
             <form action={async (fd) => { await addChild(fd); setAddChildOpen(false); }} className="p-6 space-y-4">
+              <input type="hidden" name="target_user_id" value={user.id} />
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Nama Lengkap</label>
                 <input type="text" name="full_name" required className="w-full px-3 py-2 border border-slate-300 rounded-md" />

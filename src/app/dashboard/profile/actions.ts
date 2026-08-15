@@ -7,7 +7,8 @@ import { auth } from "@/lib/auth";
 export async function updateProfile(formData: FormData) {
   const session = await auth();
   if (!session?.user) return;
-  const userId = (session.user as any).id;
+  const targetId = formData.get("target_user_id") as string;
+  const userId = ((session.user as any).role === 'admin' && targetId) ? targetId : (session.user as any).id;
 
   const fullName = formData.get("full_name") as string;
   const gender = formData.get("gender") as string;
@@ -28,7 +29,8 @@ export async function updateProfile(formData: FormData) {
 export async function addSpouse(formData: FormData) {
   const session = await auth();
   if (!session?.user) return;
-  const userId = (session.user as any).id;
+  const targetId = formData.get("target_user_id") as string;
+  const userId = ((session.user as any).role === 'admin' && targetId) ? targetId : (session.user as any).id;
 
   const fullName = formData.get("full_name") as string;
   const dob = formData.get("dob") as string;
@@ -53,7 +55,8 @@ export async function deleteSpouse(formData: FormData) {
 export async function addChild(formData: FormData) {
   const session = await auth();
   if (!session?.user) return;
-  const userId = (session.user as any).id;
+  const targetId = formData.get("target_user_id") as string;
+  const userId = ((session.user as any).role === 'admin' && targetId) ? targetId : (session.user as any).id;
 
   const fullName = formData.get("full_name") as string;
   const dob = formData.get("dob") as string;
@@ -80,7 +83,8 @@ export async function deleteChild(formData: FormData) {
 export async function addChildHealth(formData: FormData) {
   const session = await auth();
   if (!session?.user) return;
-  const userId = (session.user as any).id;
+  const targetId = formData.get("target_user_id") as string;
+  const userId = ((session.user as any).role === 'admin' && targetId) ? targetId : (session.user as any).id;
 
   const childId = formData.get("child_id");
   const measurementDate = formData.get("measurement_date") as string;

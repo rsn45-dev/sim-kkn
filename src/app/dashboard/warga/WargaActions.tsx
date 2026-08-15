@@ -3,13 +3,13 @@
 import { useState } from "react";
 import { Eye, Edit2, Trash2, X } from "lucide-react";
 import { updateWarga, deleteWarga } from "./actions";
+import Link from "next/link";
 
 type WargaActionsProps = {
   warga: any;
 };
 
 export default function WargaActions({ warga }: WargaActionsProps) {
-  const [viewOpen, setViewOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
 
   // Format Date to YYYY-MM-DD for input type="date"
@@ -18,13 +18,13 @@ export default function WargaActions({ warga }: WargaActionsProps) {
   return (
     <>
       <div className="flex space-x-2 justify-end">
-        <button
-          onClick={() => setViewOpen(true)}
+        <Link
+          href={`/dashboard/warga/${warga.id}`}
           className="inline-flex items-center text-teal-600 hover:text-teal-900 bg-teal-50 hover:bg-teal-100 px-2 py-1.5 rounded-lg transition-colors"
           title="Lihat Data"
         >
           <Eye className="w-4 h-4" />
-        </button>
+        </Link>
 
         <button
           onClick={() => setEditOpen(true)}
@@ -50,66 +50,6 @@ export default function WargaActions({ warga }: WargaActionsProps) {
           </button>
         </form>
       </div>
-
-      {/* Modal Lihat */}
-      {viewOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden">
-            <div className="flex justify-between items-center px-6 py-4 border-b border-slate-200">
-              <h3 className="text-lg font-bold text-slate-900">
-                Detail Warga
-              </h3>
-              <button
-                onClick={() => setViewOpen(false)}
-                className="text-slate-400 hover:text-slate-500 focus:outline-none"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            
-            <div className="p-6 space-y-4">
-              <div>
-                <span className="block text-sm font-medium text-slate-500">Nama Lengkap</span>
-                <span className="block text-base text-slate-900">{warga.full_name}</span>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <span className="block text-sm font-medium text-slate-500">Jenis Kelamin</span>
-                  <span className="block text-base text-slate-900">{warga.gender === 'L' ? 'Laki-laki' : 'Perempuan'}</span>
-                </div>
-                <div>
-                  <span className="block text-sm font-medium text-slate-500">Tanggal Lahir</span>
-                  <span className="block text-base text-slate-900">{new Date(warga.dob).toLocaleDateString('id-ID')}</span>
-                </div>
-              </div>
-              <div>
-                <span className="block text-sm font-medium text-slate-500">Alamat Lengkap</span>
-                <span className="block text-base text-slate-900">{warga.address}</span>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <span className="block text-sm font-medium text-slate-500">Status Pekerjaan</span>
-                  <span className="block text-base text-slate-900">{warga.job_status.replace('_', ' ')}</span>
-                </div>
-                <div>
-                  <span className="block text-sm font-medium text-slate-500">Status Pernikahan</span>
-                  <span className="block text-base text-slate-900">{warga.marital_status.replace('_', ' ')}</span>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <span className="block text-sm font-medium text-slate-500">No HP</span>
-                  <span className="block text-base text-slate-900">{warga.phone}</span>
-                </div>
-                <div>
-                  <span className="block text-sm font-medium text-slate-500">Email</span>
-                  <span className="block text-base text-slate-900">{warga.email}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Modal Edit */}
       {editOpen && (
