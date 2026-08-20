@@ -2,35 +2,40 @@ import pool from "@/lib/db";
 import { Users, Search, CheckCircle, Clock, XCircle } from "lucide-react";
 import WargaActions from "./WargaActions";
 import Link from "next/link";
+import InputWargaModal from "./InputWargaModal";
 
 export default async function WargaPage({
   searchParams,
 }: {
-  searchParams: { tab?: string };
+  searchParams: Promise<{ tab?: string }>;
 }) {
-  const currentTab = searchParams.tab || 'approved';
+  const { tab } = await searchParams;
+  const currentTab = tab || 'approved';
   
   // Filter query based on tab
   let statusFilter = 'approved';
   if (currentTab === 'pending') statusFilter = 'pending';
   if (currentTab === 'rejected') statusFilter = 'rejected';
 
-  const [rows] = await pool.execute('SELECT * FROM users WHERE status = ? AND role = "user" ORDER BY created_at DESC', [statusFilter]);
+  const [rows] = await pool.execute('SELECT * FROM users WHERE status = ? ORDER BY created_at DESC', [statusFilter]);
   const users = rows as any[];
 
   return (
     <div>
       <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
         <h1 className="text-2xl font-bold text-slate-900">Manajemen Data Warga</h1>
-        <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-4 w-4 text-slate-400" />
+        <div className="flex flex-col md:flex-row gap-3">
+          <InputWargaModal />
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="h-4 w-4 text-slate-400" />
+            </div>
+            <input
+              type="text"
+              className="block w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg leading-5 bg-white placeholder-slate-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              placeholder="Cari warga..."
+            />
           </div>
-          <input
-            type="text"
-            className="block w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg leading-5 bg-white placeholder-slate-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-            placeholder="Cari warga..."
-          />
         </div>
       </div>
 

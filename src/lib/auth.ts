@@ -20,12 +20,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         try {
           const [rows] = await pool.execute(
             "SELECT * FROM users WHERE email = ? LIMIT 1",
-            [credentials.email]
+            [credentials.email as string]
           ) as any[];
 
           const user = rows[0];
           if (!user) return null;
-          
+
           const passwordMatch = await bcrypt.compare(credentials.password as string, user.password);
           if (!passwordMatch) return null;
 
