@@ -1,16 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { Eye, Edit2, Trash2, X } from "lucide-react";
-import { updateWarga, deleteWarga } from "./actions";
+import { Eye, Edit2, Trash2, X, Check, XCircle as XCircleIcon } from "lucide-react";
+import { updateWarga, deleteWarga, approveWarga, rejectWarga } from "./actions";
 import Link from "next/link";
 
 type WargaActionsProps = {
   warga: any;
+  currentTab?: string;
 };
 
-export default function WargaActions({ warga }: WargaActionsProps) {
+export default function WargaActions({ warga, currentTab = 'approved' }: WargaActionsProps) {
   const [editOpen, setEditOpen] = useState(false);
+  const [rejectOpen, setRejectOpen] = useState(false);
 
   // Format Date to YYYY-MM-DD for input type="date"
   const formattedDate = new Date(warga.dob).toISOString().split('T')[0];
@@ -18,13 +20,37 @@ export default function WargaActions({ warga }: WargaActionsProps) {
   return (
     <>
       <div className="flex space-x-2 justify-end">
-        <Link
-          href={`/dashboard/warga/${warga.id}`}
-          className="inline-flex items-center text-teal-600 hover:text-teal-900 bg-teal-50 hover:bg-teal-100 px-2 py-1.5 rounded-lg transition-colors"
-          title="Lihat Data"
-        >
-          <Eye className="w-4 h-4" />
-        </Link>
+        {currentTab === 'pending' && (
+          <>
+            <form action={approveWarga}>
+              <input type="hidden" name="id" value={warga.id} />
+              <button 
+                type="submit"
+                className="inline-flex items-center text-green-600 hover:text-green-900 bg-green-50 hover:bg-green-100 px-2 py-1.5 rounded-lg transition-colors"
+                title="Setujui Data"
+              >
+                <Check className="w-4 h-4" />
+              </button>
+            </form>
+            <button
+              onClick={() => setRejectOpen(true)}
+              className="inline-flex items-center text-orange-600 hover:text-orange-900 bg-orange-50 hover:bg-orange-100 px-2 py-1.5 rounded-lg transition-colors"
+              title="Tolak Data"
+            >
+              <XCircleIcon className="w-4 h-4" />
+            </button>
+          </>
+        )}
+
+        {currentTab !== 'pending' && (
+          <Link
+            href={`/dashboard/warga/${warga.id}`}
+            className="inline-flex items-center text-teal-600 hover:text-teal-900 bg-teal-50 hover:bg-teal-100 px-2 py-1.5 rounded-lg transition-colors"
+            title="Lihat Data"
+          >
+            <Eye className="w-4 h-4" />
+          </Link>
+        )}
 
         <button
           onClick={() => setEditOpen(true)}
@@ -185,6 +211,61 @@ export default function WargaActions({ warga }: WargaActionsProps) {
                   className="px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none transition-colors"
                 >
                   Simpan Perubahan
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      {/* Modal Reject */}
+      {rejectOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
+            <div className="flex justify-between items-center px-6 py-4 border-b border-slate-200">
+              <h3 className="text-lg font-bold text-slate-900">
+                Tolak Pendaftaran Warga
+              </h3>
+              <button
+                onClick={() => setRejectOpen(false)}
+                className="text-slate-400 hover:text-slate-500 focus:outline-none"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <form 
+              action={async (formData) => {
+                await rejectWarga(formData);
+                setRejectOpen(false);
+              }}
+              className="p-6 space-y-4"
+            >
+              <input type="hidden" name="id" value={warga.id} />
+              
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Alasan Penolakan</label>
+                <textarea 
+                  name="reason" 
+                  required
+                  rows={3}
+                  placeholder="Masukkan alasan penolakan (misal: data tidak valid, bukan warga RT setempat)"
+                  className="block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"
+                />
+              </div>
+
+              <div className="pt-4 flex justify-end space-x-3 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setRejectOpen(false)}
+                  className="px-4 py-2 border border-slate-300 shadow-sm text-sm font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none transition-colors"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none transition-colors"
+                >
+                  Konfirmasi Tolak
                 </button>
               </div>
             </form>

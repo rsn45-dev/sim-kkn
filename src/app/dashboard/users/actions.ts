@@ -2,6 +2,7 @@
 
 import pool from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import bcrypt from "bcryptjs";
 
 export async function updateUser(formData: FormData) {
   const id = formData.get("id");
@@ -9,10 +10,11 @@ export async function updateUser(formData: FormData) {
   const password = formData.get("password") as string;
 
   if (password && password.trim() !== "") {
+    const hashedPassword = await bcrypt.hash(password, 10);
     // Update role and password
     await pool.execute(
       'UPDATE users SET role=?, password=? WHERE id=?',
-      [role, password, id]
+      [role, hashedPassword, id]
     );
   } else {
     // Update role only
@@ -30,6 +32,7 @@ export async function resetPassword(formData: FormData) {
   if (!userId) return;
 
   // Reset password to '123456' temporarily for demo purposes
-  await pool.execute('UPDATE users SET password = ? WHERE id = ?', ['123456', userId]);
+  const hashedPassword = await bcrypt.hash('123456', 10);
+  await pool.execute('UPDATE users SET password = ? WHERE id = ?', [hashedPassword, userId]);
   revalidatePath('/dashboard/users');
 }

@@ -25,6 +25,9 @@ export default function LoginForm() {
         <p className="mt-2 text-center text-sm text-slate-500">
           Sistem Pendataan Warga &amp; Monitoring Kesehatan
         </p>
+        <p className="mt-2 text-center text-sm text-slate-500">
+          RT 02 RW 06 Patemon, Kecamatan Gunungpati Semarang
+        </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">

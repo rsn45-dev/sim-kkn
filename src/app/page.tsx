@@ -16,7 +16,7 @@ export default function Home() {
     if (!formData.tglLahir || !formData.tinggi || !formData.berat) return;
     const height = parseFloat(formData.tinggi);
     const weight = parseFloat(formData.berat);
-    
+
     const r = calcHealthStatus(
       formData.gender,
       formData.tglLahir,
@@ -36,12 +36,12 @@ export default function Home() {
     });
   };
 
-  const alertBg   = result?.alertLevel === 'danger'  ? 'bg-red-50 border-red-200'    : result?.alertLevel === 'warning' ? 'bg-orange-50 border-orange-200' : 'bg-emerald-50 border-emerald-200';
-  const alertText = result?.alertLevel === 'danger'  ? 'text-red-700'                : result?.alertLevel === 'warning' ? 'text-orange-700'                : 'text-emerald-700';
-  const recBg     = result?.alertLevel === 'danger'  ? 'bg-red-50 border-red-100'    : result?.alertLevel === 'warning' ? 'bg-orange-50 border-orange-100'  : 'bg-blue-50 border-blue-100';
-  const recText   = result?.alertLevel === 'danger'  ? 'text-red-900'                : result?.alertLevel === 'warning' ? 'text-orange-900'                 : 'text-blue-900';
-  const recBody   = result?.alertLevel === 'danger'  ? 'text-red-800'                : result?.alertLevel === 'warning' ? 'text-orange-800'                 : 'text-blue-800';
-  const recIcon   = result?.alertLevel === 'danger'  ? 'text-red-500'                : result?.alertLevel === 'warning' ? 'text-orange-500'                 : 'text-blue-500';
+  const alertBg = result?.alertLevel === 'danger' ? 'bg-red-50 border-red-200' : result?.alertLevel === 'warning' ? 'bg-orange-50 border-orange-200' : 'bg-emerald-50 border-emerald-200';
+  const alertText = result?.alertLevel === 'danger' ? 'text-red-700' : result?.alertLevel === 'warning' ? 'text-orange-700' : 'text-emerald-700';
+  const recBg = result?.alertLevel === 'danger' ? 'bg-red-50 border-red-100' : result?.alertLevel === 'warning' ? 'bg-orange-50 border-orange-100' : 'bg-blue-50 border-blue-100';
+  const recText = result?.alertLevel === 'danger' ? 'text-red-900' : result?.alertLevel === 'warning' ? 'text-orange-900' : 'text-blue-900';
+  const recBody = result?.alertLevel === 'danger' ? 'text-red-800' : result?.alertLevel === 'warning' ? 'text-orange-800' : 'text-blue-800';
+  const recIcon = result?.alertLevel === 'danger' ? 'text-red-500' : result?.alertLevel === 'warning' ? 'text-orange-500' : 'text-blue-500';
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
@@ -56,7 +56,7 @@ export default function Home() {
           </div>
           <Link href="/login" className="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg font-medium transition-colors text-sm">
             <LogIn className="w-4 h-4" />
-            <span className="hidden sm:inline">Masuk Petugas</span>
+            <span className="hidden sm:inline">Masuk</span>
             <span className="sm:hidden">Masuk</span>
           </Link>
         </div>
@@ -81,18 +81,18 @@ export default function Home() {
             <form onSubmit={handleSubmit} className="p-5 space-y-5">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">Nama Lengkap</label>
-                <input type="text" required value={formData.nama} onChange={e => setFormData({...formData, nama: e.target.value})}
+                <input type="text" required value={formData.nama} onChange={e => setFormData({ ...formData, nama: e.target.value })}
                   className="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none transition-all" placeholder="Contoh: Budi Santoso" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1.5">Tanggal Lahir</label>
-                  <input type="date" required value={formData.tglLahir} onChange={e => setFormData({...formData, tglLahir: e.target.value})}
+                  <input type="date" required value={formData.tglLahir} onChange={e => setFormData({ ...formData, tglLahir: e.target.value })}
                     className="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none transition-all" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1.5">Jenis Kelamin</label>
-                  <select value={formData.gender} onChange={e => setFormData({...formData, gender: e.target.value})}
+                  <select value={formData.gender} onChange={e => setFormData({ ...formData, gender: e.target.value })}
                     className="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none transition-all">
                     <option value="L">Laki-Laki</option>
                     <option value="P">Perempuan</option>
@@ -102,12 +102,12 @@ export default function Home() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1.5">Berat Badan (kg)</label>
-                  <input type="number" step="0.1" min="1" required value={formData.berat} onChange={e => setFormData({...formData, berat: e.target.value})}
+                  <input type="number" step="0.1" min="1" required value={formData.berat} onChange={e => setFormData({ ...formData, berat: e.target.value })}
                     className="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none transition-all" placeholder="12.5" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1.5">Tinggi Badan (cm)</label>
-                  <input type="number" step="0.1" min="30" required value={formData.tinggi} onChange={e => setFormData({...formData, tinggi: e.target.value})}
+                  <input type="number" step="0.1" min="30" required value={formData.tinggi} onChange={e => setFormData({ ...formData, tinggi: e.target.value })}
                     className="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none transition-all" placeholder="85.0" />
                 </div>
               </div>
@@ -242,6 +242,25 @@ export default function Home() {
           </div>
         </div>
       </main>
+
+      {/* Footer */}
+      <footer className="bg-slate-900 text-slate-300 py-10 mt-auto border-t border-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-blue-600/20 rounded-xl flex items-center justify-center">
+                <Activity className="w-6 h-6 text-blue-500" />
+              </div>
+              <span className="text-xl font-bold text-white">Stunting Care</span>
+            </div>
+
+            <div className="text-sm text-center md:text-right">
+              <p>&copy; {new Date().getFullYear()} KKN Stunting App. RT 02 RW 06 Patemon</p>
+              <p className="mt-1 text-slate-500">Mewujudkan generasi sehat dan bebas stunting.</p>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

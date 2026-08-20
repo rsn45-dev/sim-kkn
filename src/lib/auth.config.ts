@@ -63,5 +63,9 @@ export const authConfig: NextAuthConfig = {
       return session;
     },
   },
-  session: { strategy: "jwt" },
+  session: {
+    strategy: "jwt",
+    maxAge: 60 * 60, // 1 jam session timeout
+    updateAge: 60 * 15, // Update session tiap 15 menit jika aktif
+  },
 };

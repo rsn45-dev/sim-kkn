@@ -33,3 +33,20 @@ export async function deleteWarga(formData: FormData) {
     revalidatePath('/dashboard/warga');
   }
 }
+
+export async function approveWarga(formData: FormData) {
+  const id = formData.get("id");
+  if (id) {
+    await pool.execute('UPDATE users SET status="approved", rejection_reason=NULL WHERE id=?', [id]);
+    revalidatePath('/dashboard/warga');
+  }
+}
+
+export async function rejectWarga(formData: FormData) {
+  const id = formData.get("id");
+  const reason = formData.get("reason") as string;
+  if (id && reason) {
+    await pool.execute('UPDATE users SET status="rejected", rejection_reason=? WHERE id=?', [reason, id]);
+    revalidatePath('/dashboard/warga');
+  }
+}

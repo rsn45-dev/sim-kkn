@@ -32,8 +32,8 @@ export default async function AspirasiPage({
     params.push(`%${q}%`);
   }
 
-  dataQuery += " ORDER BY created_at DESC LIMIT ? OFFSET ?";
-  const dataParams = [...params, limit, offset];
+  dataQuery += ` ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`;
+  const dataParams = [...params];
 
   const [countRows] = await pool.execute(countQuery, params);
   const totalItems = (countRows as any[])[0].total;

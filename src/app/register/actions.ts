@@ -2,6 +2,7 @@
 
 import pool from "@/lib/db";
 import { redirect } from "next/navigation";
+import bcrypt from "bcryptjs";
 
 export async function registerUser(formData: FormData) {
   const fullName = formData.get("fullName") as string;
@@ -14,12 +15,14 @@ export async function registerUser(formData: FormData) {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
 
+  const hashedPassword = await bcrypt.hash(password, 10);
+
   try {
     await pool.execute(
       `INSERT INTO users 
-      (full_name, gender, dob, address, job_status, marital_status, phone, email, password, role) 
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [fullName, gender, dob, address, jobStatus, maritalStatus, phone, email, password, 'user']
+      (full_name, gender, dob, address, job_status, marital_status, phone, email, password, role, status) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [fullName, gender, dob, address, jobStatus, maritalStatus, phone, email, hashedPassword, 'user', 'pending']
     );
   } catch (error) {
     console.error("Failed to register:", error);

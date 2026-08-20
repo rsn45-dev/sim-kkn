@@ -1,5 +1,6 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import bcrypt from "bcryptjs";
 import pool from "@/lib/db";
 import { authConfig } from "@/lib/auth.config";
 
@@ -24,7 +25,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
           const user = rows[0];
           if (!user) return null;
-          if (user.password !== credentials.password) return null;
+          
+          const passwordMatch = await bcrypt.compare(credentials.password as string, user.password);
+          if (!passwordMatch) return null;
+
+          if (user.role === 'user' && user.status !== 'approved') {
+            throw new Error("Akun Anda belum divalidasi atau telah ditolak oleh Admin.");
+          }
 
           return {
             id: String(user.id),
