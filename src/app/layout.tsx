@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Stunting Care - Sistem Pendataan Kesehatan Anak",
+  title: "APP-Digitalisasi RT 02 RW 06 Patemon",
   description: "Aplikasi berbasis website untuk pendataan warga dan pengukuran kesehatan stunting anak berdasarkan berat badan dan tinggi badan.",
 };
 
